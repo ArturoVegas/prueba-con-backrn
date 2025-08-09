@@ -4,21 +4,40 @@ const API_BASE = 'https://backend-bue9.onrender.com/api';
 async function getFreshToken() {
   try {
     const userSession = getUserSession();
-    if (!userSession || !userSession.email) {
-      throw new Error('No hay sesión de usuario');
+    if (!userSession || !userSession.refreshToken) {
+      throw new Error('No hay refreshToken disponible');
     }
 
-    // Intentar renovar el token a través del backend
-    // Por ahora, como no tenemos endpoint de renovación,
-    // simplemente pediremos al usuario que vuelva a iniciar sesión
-    console.log('Token expirado. Necesitas iniciar sesión nuevamente.');
+    console.log('Renovando token expirado...');
     
-    // Limpiar sesión y redirigir al login
-    logout();
-    return null;
+    // Usar el endpoint del backend para renovar el token
+    const response = await fetch(`${API_BASE}/auth/refresh-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refreshToken: userSession.refreshToken })
+    });
+
+    if (!response.ok) {
+      throw new Error('No se pudo renovar el token');
+    }
+
+    const data = await response.json();
+    
+    // Actualizar la sesión con el nuevo token
+    const updatedSession = {
+      ...userSession,
+      token: data.token,
+      refreshToken: data.refreshToken
+    };
+    
+    saveUserSession(updatedSession);
+    console.log('Token renovado exitosamente');
+    
+    return data.token;
     
   } catch (error) {
-    console.error('Error obteniendo token fresco:', error);
+    console.error('Error renovando token:', error);
+    console.log('No se pudo renovar el token. Debes iniciar sesión nuevamente.');
     logout();
     return null;
   }
@@ -183,9 +202,10 @@ async function login(email, password) {
 
     if (!res.ok) throw new Error(data.error || 'Error en login');
 
-    // Guardamos token, uid, email y displayName (si viene)
+    // Guardamos token, refreshToken, uid, email y displayName (si viene)
     saveUserSession({
       token: data.token,
+      refreshToken: data.refreshToken,
       uid: data.uid,
       email: data.email,
       displayName: data.displayName || null,
