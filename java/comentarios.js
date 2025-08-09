@@ -77,22 +77,70 @@ const userAvatar = document.getElementById("user-avatar");
 
 let usuarioActual = null;
 
-onAuthStateChanged(auth, (user) => {
-  usuarioActual = user;
-  actualizarUI(user);
+// Integración con el sistema de autenticación global
+function syncWithGlobalAuth() {
+  const globalUser = getUserSession();
+  
+  if (globalUser) {
+    // Crear un objeto compatible con Firebase Auth para mantener compatibilidad
+    usuarioActual = {
+      uid: globalUser.uid,
+      email: globalUser.email,
+      displayName: globalUser.displayName,
+      // Agregar métodos necesarios que espera el código
+    };
+  } else {
+    usuarioActual = null;
+  }
+  
+  actualizarUI(usuarioActual);
   cargarComentarios();
+}
+
+// Función para obtener sesión del usuario desde auth.js
+function getUserSession() {
+  const userStr = localStorage.getItem('user');
+  return userStr ? JSON.parse(userStr) : null;
+}
+
+// Listener para cambios en localStorage (sincronización entre pestañas)
+window.addEventListener('storage', (e) => {
+  if (e.key === 'user') {
+    syncWithGlobalAuth();
+  }
 });
+
+// También mantener la funcionalidad original de Firebase como fallback
+onAuthStateChanged(auth, (user) => {
+  if (user && !getUserSession()) {
+    // Solo usar Firebase Auth si no hay sesión global
+    usuarioActual = user;
+    actualizarUI(user);
+    cargarComentarios();
+  }
+});
+
+// Inicializar sincronización
+syncWithGlobalAuth();
 
 btnIniciar?.addEventListener("click", () => {
   window.location.href = "../html/auth.html";
 });
 
 btnLogout?.addEventListener("click", async () => {
-  await signOut(auth);
-  localStorage.removeItem('rememberUser');
-  localStorage.removeItem('userEmail');
-  mostrarNotificacion("Sesión cerrada correctamente.", "success");
-  setTimeout(() => location.reload(), 1000);
+  // Usar el logout global si está disponible
+  if (typeof logout === 'function') {
+    logout();
+  } else {
+    // Fallback al logout local
+    await signOut(auth);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    localStorage.removeItem('rememberUser');
+    localStorage.removeItem('userEmail');
+    mostrarNotificacion("Sesión cerrada correctamente.", "success");
+    setTimeout(() => location.reload(), 1000);
+  }
 });
 
 document.getElementById("btn-publicar-comentario")?.addEventListener("click", publicarComentario);
