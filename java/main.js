@@ -1,6 +1,7 @@
 import { cargarMangas, setupResizeListener } from "./mangas.js";
 import { cargarInfoManga } from "./infoMangas.js";
 import { cargarCapitulo } from "./vermangas.js";
+import { cargarUltimasActualizaciones } from "./index.js";
 import { cargarNombresMangas, inicializarBuscadorConAutocomplete } from "./buscador.js";
 import { cargarMangasPopulares } from "./mangasPopulares.js";
 import { cargarCarruselPrincipal } from "./carrusel.js";
@@ -127,6 +128,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 const page = window.location.pathname.split("/").pop();
+
+if (page === "" || page === "index.html") {
+  console.log("✅ Página index detectada, cargando últimas actualizaciones...");
+  cargarUltimasActualizaciones()
+    .then(() => console.log("✅ Últimas actualizaciones cargadas correctamente"))
+    .catch(err => console.error("❌ Error cargando últimas actualizaciones:", err));
+}
+
   
 
   // Sistema de animaciones de entrada - Solo una vez al cargar

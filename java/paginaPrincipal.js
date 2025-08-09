@@ -1,3 +1,5 @@
+console.log("Script paginaPrincipal.js cargado correctamente");
+
 const API_URL = 'https://backend-bue9.onrender.com/api/ultimas-actualizaciones';
 
 // Función para mostrar skeleton loader
@@ -38,8 +40,21 @@ function manejarErrorImagen(img) {
     this.alt = 'Imagen no disponible';
   };
 }
+function inicializarPagina() {
+  const loader = document.getElementById('page-loader');
+  if (loader) {
+    setTimeout(() => {
+      loader.classList.add('hidden');
+      setTimeout(() => loader.remove(), 500);
+    }, 1000);
+  }
+}
+
+
 
 async function cargarUltimasActualizaciones() {
+  console.log("Cargando actualizaciones desde:", API_URL);
+
   const ultimasActualizacionesCont = document.getElementById("ultimas-actualizaciones");
   if (!ultimasActualizacionesCont) return;
 
@@ -47,9 +62,13 @@ async function cargarUltimasActualizaciones() {
   mostrarSkeletonLoader(ultimasActualizacionesCont);
 
   try {
+
     const response = await fetch(API_URL);
     if (!response.ok) throw new Error('Error en la respuesta de la API');
     const recientes = await response.json();
+     console.log("🟢 Estado de la respuesta:", response.status, response.ok);
+  console.log("📦 Datos recibidos:", recientes);
+
 
     ultimasActualizacionesCont.innerHTML = "";
 
@@ -116,6 +135,10 @@ async function cargarUltimasActualizaciones() {
     // Añadir event listeners para interacciones mejoradas
     añadirEventListenersCards();
 
+
+    // Ejecutar loader oculto una vez todo esté renderizado
+    inicializarPagina();  // ⬅️ AÑADIR AQUÍ
+
   } catch (error) {
     console.error("Error al cargar últimas actualizaciones:", error);
     ultimasActualizacionesCont.innerHTML = `
@@ -131,6 +154,101 @@ async function cargarUltimasActualizaciones() {
     `;
   }
 }
+
+export async function cargarMangasPopulares() {
+  const contenedor = document.getElementById("carrusel-populares");
+  if (!contenedor) return;
+
+  try {
+    const response = await fetch("https://backend-bue9.onrender.com/api/populares");
+    if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+
+    const contenidoOrdenado = await response.json();
+
+    if (!Array.isArray(contenidoOrdenado) || contenidoOrdenado.length === 0) {
+      contenedor.innerHTML = "<p class='text-light'>No hay contenido disponible.</p>";
+      return;
+    }
+
+    contenedor.innerHTML = "";
+
+    contenidoOrdenado.slice(0, 10).forEach(({ nombre, portada, tipo }, index) => {
+      const envoltorio = document.createElement("div");
+      envoltorio.classList.add("popular-card-wrapper");
+      envoltorio.setAttribute('style', 'opacity: 0 !important; transform: translateY(30px) !important; display: flex !important; flex-shrink: 0 !important;');
+      envoltorio.setAttribute('data-animation-processed', 'false');
+
+      const tarjeta = document.createElement("div");
+      tarjeta.className = "card h-100";
+
+      const urlParam = tipo === 'novela' ? `id=${encodeURIComponent(nombre)}&tipo=novela` : `id=${encodeURIComponent(nombre)}`;
+
+      tarjeta.innerHTML = `
+        <a href="./html/infoMangas.html?${urlParam}" class="text-decoration-none text-reset">
+          <div class="position-relative">
+            <img src="${portada}" class="card-img-top" alt="${nombre.replaceAll("_", " ")}" />
+            <span class="badge tipo-badge badge-${tipo}">${tipo === 'novela' ? 'Novela' : 'Manga'}</span>
+          </div>
+          <div class="card-body text-center">
+            <h5 class="card-title">${nombre.replaceAll("_", " ")}</h5>
+          </div>
+        </a>
+      `;
+
+      envoltorio.appendChild(tarjeta);
+      contenedor.appendChild(envoltorio);
+    });
+
+    // Animar las cards con delay
+    const popularCards = document.querySelectorAll('.popular-card-wrapper');
+    popularCards.forEach((card, index) => {
+      if (card.getAttribute('data-animation-processed') === 'false') {
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+          card.setAttribute('data-animation-processed', 'true');
+          card.classList.add('animated');
+          setTimeout(() => {
+            card.style.removeProperty('opacity');
+            card.style.removeProperty('transform');
+          }, 700);
+        }, index * 100);
+      }
+    });
+
+    // Protección de estilos con MutationObserver
+    const observer = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const target = mutation.target;
+          if (target.classList.contains('popular-card-wrapper') &&
+              target.classList.contains('animated') &&
+              target.getAttribute('data-animation-processed') === 'true') {
+            const style = target.getAttribute('style') || '';
+            if (!style.includes('opacity: 1') || !style.includes('translateY(0)')) {
+              target.style.opacity = '1';
+              target.style.transform = 'translateY(0)';
+            }
+          }
+        }
+      });
+    });
+
+    observer.observe(contenedor, {
+      attributes: true,
+      subtree: true,
+      attributeFilter: ['style']
+    });
+
+  } catch (error) {
+    console.error("Error al cargar contenido popular:", error);
+    contenedor.innerHTML = "<p class='text-danger'>Error al cargar el contenido popular.</p>";
+  }
+}
+
+
+
+
 
 // Función para añadir event listeners a las cards
 function añadirEventListenersCards() {
@@ -173,5 +291,6 @@ function tiempoDesde(fecha) {
 
 // Inicializar carga cuando se cargue el DOM
 document.addEventListener('DOMContentLoaded', () => {
+  cargarMangasPopulares();
   cargarUltimasActualizaciones();
 });

@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Explora nuestra extensa colección de manga traducido al español. White Pearl Translation - Tu fuente confiable de manga de alta calidad." />
-  <meta name="keywords" content="manga, traducción, español, White Pearl Translation, lectura online" />
+  <meta name="description" content="Explora nuestra extensa biblioteca de manga y novelas traducidas al español. White Pearl Translation - Tu fuente confiable de contenido de alta calidad." />
+  <meta name="keywords" content="manga, novelas, traducción, español, White Pearl Translation, lectura online, biblioteca" />
   <meta name="author" content="White Pearl Translation" />
   
   <!-- Open Graph -->
-  <meta property="og:title" content="Nuestros Mangas - White Pearl Translation" />
-  <meta property="og:description" content="Descubre nuestra colección completa de manga traducido con la mejor calidad." />
+  <meta property="og:title" content="Biblioteca - White Pearl Translation" />
+  <meta property="og:description" content="Descubre nuestra colección completa de manga y novelas traducidas con la mejor calidad." />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="../Recursos/imagenes/whitePearltranslation.png" />
   
@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
-  <title>Nuestros Mangas - White Pearl Translation</title>
+  <title>Biblioteca - White Pearl Translation</title>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -76,9 +76,9 @@
         <div class="collapse navbar-collapse" id="navbarContent">
           <ul class="navbar-nav flex-column flex-lg-row w-100 justify-content-center align-items-center" role="menu">
             <li class="nav-item" role="none">
-              <a class="nav-link active" href="../html/mangas.html" role="menuitem">
-                <i class="bi bi-book me-2"></i>
-                <span>Nuestros mangas</span>
+              <a class="nav-link active" href="../html/biblioteca.html" role="menuitem">
+                <i class="bi bi-collection me-2"></i>
+                <span>Biblioteca</span>
               </a>
             </li>
             <!-- Botón de versión solo para móviles -->
@@ -101,8 +101,8 @@
                 id="input-buscar"
                 class="form-control border-dark"
                 type="search"
-                placeholder="🔍 Buscar manga..."
-                aria-label="Buscar manga"
+                placeholder="🔍 Buscar manga o novela..."
+                aria-label="Buscar manga o novela"
                 autocomplete="off"
               />
               <ul class="autocomplete-list" id="autocomplete-list"></ul>
@@ -142,10 +142,27 @@
   <!-- Contenido principal -->
   <div class="container my-4">
     <div class="row justify-content-center align-items-start">
-      <!-- Manga Listas -->
+      <!-- Biblioteca -->
       <div class="col-12 col-lg-8">
         <div class="p-3 rounded">
-          <h5 class="text-light mb-3 maspopulares">Listas de Manga</h5>
+          <h5 class="text-light mb-3 maspopulares">
+            <i class="bi bi-collection me-2"></i>Biblioteca Digital
+          </h5>
+
+          <!-- Filtros de tipo de contenido -->
+          <div class="d-flex flex-wrap gap-3 mb-3">
+            <div class="btn-group" role="group" aria-label="Tipo de contenido">
+              <button type="button" class="btn btn-outline-info active" id="btnTodos" data-tipo="">
+                <i class="bi bi-grid-3x3-gap me-2"></i>Todos
+              </button>
+              <button type="button" class="btn btn-outline-info" id="btnMangas" data-tipo="manga">
+                <i class="bi bi-book me-2"></i>Mangas
+              </button>
+              <button type="button" class="btn btn-outline-info" id="btnNovelas" data-tipo="novela">
+                <i class="bi bi-journal-text me-2"></i>Novelas
+              </button>
+            </div>
+          </div>
 
           <!-- Contenedor filtros en fila -->
           <div class="d-flex flex-wrap gap-3 mb-3">
@@ -183,7 +200,7 @@
           </div>
 
           <!-- Tarjetas -->
-          <div id="contenedor-mangas" class="row mt-4 g-3 row-cols-2 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
+          <div id="contenedor-items" class="row mt-4 g-3 row-cols-2 row-cols-sm-2 row-cols-md-2 row-cols-lg-3 row-cols-xl-4">
             <!-- Tarjetas dinámicas aquí -->
           </div>
 
